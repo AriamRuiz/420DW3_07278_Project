@@ -9,15 +9,8 @@ declare(strict_types=1);
  * (c) Copyright 2024 Marc-Eric Boury 
  */
 
-namespace Teacher\GivenCode\Services;
+namespace UserManagement\Service;
 
-use Marc\Project\controllers\myTestController;
-use Teacher\Examples\Controllers\AuthorController;
-use Teacher\Examples\Controllers\BookController;
-use Teacher\Examples\Controllers\ExampleController;
-use Teacher\Examples\Controllers\LoginController;
-use Teacher\Examples\Controllers\MyNewController;
-use Teacher\Examples\Controllers\PageNavigator;
 use Teacher\GivenCode\Abstracts\IService;
 use Teacher\GivenCode\Domain\AbstractRoute;
 use Teacher\GivenCode\Domain\APIRoute;
@@ -26,15 +19,13 @@ use Teacher\GivenCode\Domain\RouteCollection;
 use Teacher\GivenCode\Domain\WebpageRoute;
 use Teacher\GivenCode\Exceptions\RequestException;
 use Teacher\GivenCode\Exceptions\ValidationException;
+use UserManagement\Controller\LoginController;
+use UserManagement\Controller\UserController;
 
 /**
- * TODO: Class documentation
- *
- * @author Marc-Eric Boury
- * @since  2024-03-14
+ * Internal Router Service
  */
 class InternalRouter implements IService {
-    
     private string $uriBaseDirectory;
     protected RouteCollection $routes;
     
@@ -45,25 +36,20 @@ class InternalRouter implements IService {
     public function __construct(string $uri_base_directory = "") {
         $this->uriBaseDirectory = $uri_base_directory;
         $this->routes = new RouteCollection();
-        $this->routes->addRoute(new APIRoute("/api/exampleDTO", ExampleController::class));
+        
         $this->routes->addRoute(new APIRoute("/api/login", LoginController::class));
-        $this->routes->addRoute(new APIRoute("/api/books", BookController::class));
-        $this->routes->addRoute(new APIRoute("/api/authors", AuthorController::class));
-        $this->routes->addRoute(new WebpageRoute("/index.php", "Teacher/Examples/example_page.php"));
-        $this->routes->addRoute(new WebpageRoute("/", "Teacher/Examples/example_page.php"));
+        $this->routes->addRoute(new APIRoute('/api/users', UserController::class));
+        $this->routes->addRoute(new WebpageRoute("/index.php", "UserManagement/index_page.php"));
+        $this->routes->addRoute(new WebpageRoute("/", "UserManagement/index_page.php"));
         $this->routes->addRoute(new CallableRoute("/pages/login", [PageNavigator::class, "loginPage"]));
-        $this->routes->addRoute(new CallableRoute("/pages/books", [PageNavigator::class, "booksManagementPage"]));
-        $this->routes->addRoute(new CallableRoute("/pages/authors", [PageNavigator::class, "authorsManagementPage"]));
+        $this->routes->addRoute(new CallableRoute('/pages/users', [PageNavigator::class, 'usersManagementPage']));
     }
     
     /**
-     * TODO: Function documentation
+     * Routes the application
      *
      * @return void
      * @throws RequestException
-     *
-     * @author Marc-Eric Boury
-     * @since  2024-03-16
      */
     public function route() : void {
         $path = REQUEST_PATH;
@@ -75,7 +61,6 @@ class InternalRouter implements IService {
         }
         
         $route->route();
-        
     }
     
     /**
@@ -84,9 +69,6 @@ class InternalRouter implements IService {
      * @param AbstractRoute $route The route definition to add to the route collection.
      * @return void
      * @throws ValidationException
-     *
-     * @author Marc-Eric Boury
-     * @since  2024-04-12
      */
     public function addRoute(AbstractRoute $route) : void {
         $this->routes->addRoute($route);
